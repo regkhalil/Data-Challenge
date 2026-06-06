@@ -79,7 +79,6 @@ def estimate_occlusion(image_path: Path) -> float:
     ycrcb[:, :, 0] = clahe.apply(ycrcb[:, :, 0])
     image_normalized = cv2.cvtColor(ycrcb, cv2.COLOR_YCrCb2BGR)
 
-    # Convert normalized image to HSV
     hsv = cv2.cvtColor(image_normalized, cv2.COLOR_BGR2HSV)
     
     # Step 2: Check if the original image is monochrome/grayscale
@@ -87,11 +86,9 @@ def estimate_occlusion(image_path: Path) -> float:
     mean_saturation = np.mean(original_hsv[:, :, 1])
     
     if mean_saturation < 12:
-        # --- GRAYSCALE / MONOCHROME LOGIC ---
         v_channel = hsv[:, :, 2]
         skin_mask = cv2.inRange(v_channel, 45, 235)
     else:
-        # --- NORMAL COLOR LOGIC ---
         lower1 = np.array([0, 8, 35], dtype=np.uint8)
         upper1 = np.array([28, 255, 255], dtype=np.uint8)
         
@@ -102,26 +99,46 @@ def estimate_occlusion(image_path: Path) -> float:
         mask2 = cv2.inRange(hsv, lower2, upper2)
         skin_mask = cv2.bitwise_or(mask1, mask2)
         
+    # Step 3: Texture Analysis (High-Pass Laplacian Filter)
+    # Convert normalized image to grayscale to find edges
+    gray = cv2.cvtColor(image_normalized, cv2.COLOR_BGR2GRAY)
+    
+    # Blur slightly to remove tiny image noise (JPEG compression artifacts)
+    blurred = cv2.GaussianBlur(gray, (3, 3), 0)
+    
+    # Calculate Laplacian to find high-frequency textures (fabric grids, sharp edges)
+    laplacian = cv2.Laplacian(blurred, cv2.CV_64F)
+    abs_laplacian = cv2.convertScaleAbs(laplacian)
+    
+    # Threshold to create an "occlusion edge mask" 
+    # Values > 45 represent dense non-skin texture. Smooth skin stays black (0).
+    _, edge_mask = cv2.threshold(abs_laplacian, 45, 255, cv2.THRESH_BINARY)
+    
+    # CRITICAL: Remove highly textured pixels from our skin mask.
+    # If a pixel is skin-colored but highly textured, we reject it as an occlusion.
+    skin_mask = cv2.bitwise_and(skin_mask, cv2.bitwise_not(edge_mask))
+        
     # Apply the circular Region of Interest (ROI) mask
     skin_in_roi = cv2.bitwise_and(skin_mask, skin_mask, mask=roi_mask)
     skin_pixels = int(np.count_nonzero(skin_in_roi))
 
     # --- SAFETY NET FOR HEURISTIC FAILURE ---
-    # If the mask finds absolutely 0 skin pixels, the color filter completely lost the face.
-    # Instead of confidently predicting 1.0 (100% occlusion) and getting penalized heavily,
-    # we guess a conservative, safe value close to the dataset baseline.
     if skin_pixels == 0:
-        return 0.2000
+        # We drop the safety net down to 0.05. If the camera completely blinds 
+        # our script, it's safer to guess the face is mostly clean based on dataset math.
+        return 0.0500
 
     # Calculate final occlusion fraction
     occlusion = 1.0 - (skin_pixels / roi_pixel_count)
     
-    # Defensive Clamping: Even if a face looks highly occluded to our basic script,
-    # we cap the maximum prediction at 0.60 to protect against heavy mathematical penalties.
+    # Natural Edge Offset: The laplacian filter will naturally catch eyelashes and lips.
+    # We subtract a flat 8% to prevent inflating the score on completely clean faces.
+    occlusion -= 0.08
+    
+    # Defensive Clamping (Floor at 0.0, Ceiling at 0.60)
     occlusion = float(np.clip(occlusion, 0.0, 0.60))
     
     return round(occlusion, 4)
-
 
 
 def build_submission(
