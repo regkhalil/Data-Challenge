@@ -8,6 +8,13 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Data (large files)
 occlusion_datasets/
 crops/
 test_predictions.csv
+
+# Model training outputs
+checkpoints/
+logs/
+submissions/
