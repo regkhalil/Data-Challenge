@@ -74,8 +74,9 @@ def main(cfg_path: str, debug: bool = False, exp_name: str = None, resume: str =
     val_tf = make_transforms(train=False, cfg=cfg)
     image_root = cfg["data"]["image_root"]
 
-    train_ds = OcclusionDataset(df_train, image_root, train_tf)
-    val_ds = OcclusionDataset(df_val, image_root, val_tf)
+    synth_p = cfg["training"].get("synth_degrad_p", 0.0)
+    train_ds = OcclusionDataset(df_train, image_root, train_tf, synth_degrad_p=synth_p)
+    val_ds = OcclusionDataset(df_val, image_root, val_tf)  # no degradation on val
 
     sampler = None
     shuffle = True
@@ -84,6 +85,9 @@ def main(cfg_path: str, debug: bool = False, exp_name: str = None, resume: str =
             df_train,
             cfg["training"].get("gender_balance", True),
             cfg["training"].get("male_boost", 1.0),
+            cfg["training"].get("tail_k", 0.0),
+            cfg["training"].get("tail_p", 2.0),
+            cfg["training"].get("male_boost_gt_scaled", False),
         )
         shuffle = False
 
