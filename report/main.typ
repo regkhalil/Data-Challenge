@@ -6,9 +6,23 @@
   paper: "a4",
   margin: (top: 1.8cm, bottom: 1.8cm, left: 1.6cm, right: 1.6cm),
   columns: 2,
+  footer: context [
+    #align(center)[
+      #text(9pt, fill: gray.darken(20%))[
+        Page #counter(page).display() of #counter(page).final().first()
+      ]
+    ]
+  ]
 )
 #set text(font: "New Computer Modern", size: 10pt, lang: "en")
-#set par(justify: true, leading: 0.55em)
+#set par(justify: true, leading: 0.50em) // Tightened leading to save vertical space
+
+// Optimized heading spacing to eliminate page overflow
+#show heading: it => [
+  #v(0.35em)
+  #block(text(font: "New Computer Modern", weight: "bold", it.body))
+  #v(0.2em)
+]
 #set heading(numbering: "1.")
 
 // ── Title block (full-width) ─────────────────────────────────
@@ -22,14 +36,14 @@
       Face Occlusion Estimation: A Deep Learning Approach \
       with Classical CV Baseline
     ]
-    #v(0.3em)
+    #v(0.25em)
     #text(10pt)[
       *Group Name:* Join the Club · *Group Number:* 17 \
       *Repository:* #link("https://github.com/regkhalil/Data-Challenge")[github.com/regkhalil/Data-Challenge]
     ]
-    #v(0.2em)
+    #v(0.15em)
     #line(length: 100%, stroke: 0.5pt)
-    #v(0.3em)
+    #v(0.25em)
   ]
 ]
 
@@ -228,4 +242,5 @@ compressed, low-resolution crops.
 // ============================================================
 // References
 // ============================================================
+#set bibliography(style: "ieee")
 #bibliography("refs.bib")
