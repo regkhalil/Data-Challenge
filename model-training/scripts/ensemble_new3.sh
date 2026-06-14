@@ -5,7 +5,6 @@
 #SBATCH --partition=CPU
 #SBATCH --time=00:10:00
 #SBATCH --mail-type=END,FAIL
-#SBATCH --mail-user=kbelmajd-25@telecom-paris.fr
 
 # S9 — Ensemble des 3 modèles dégradation-aware
 # cnx_synth_ft (fine-tune ConvNeXt + synth_degrad) + swin_base_v1 + effnetv2_m_v1

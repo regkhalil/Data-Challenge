@@ -5,7 +5,6 @@
 #SBATCH --partition=CPU
 #SBATCH --time=00:10:00
 #SBATCH --mail-type=END,FAIL
-#SBATCH --mail-user=kbelmajd-25@telecom-paris.fr
 
 # S10 (réserve) — max(S9, S7) sample-par-sample
 # Laisse le spécialiste dégradation "gagner" sur les cas extrêmes

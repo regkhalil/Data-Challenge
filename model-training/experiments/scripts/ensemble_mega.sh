@@ -5,7 +5,6 @@
 #SBATCH --partition=CPU
 #SBATCH --time=00:10:00
 #SBATCH --mail-type=END,FAIL
-#SBATCH --mail-user=kbelmajd-25@telecom-paris.fr
 
 source ~/envs/occlusion/bin/activate
 cd ~/data_challenge
