@@ -1,0 +1,39 @@
+data:
+  train_csv: DataChallenge2026/occlusion_datasets/train.csv
+  test_csv: DataChallenge2026/occlusion_datasets/test_students.csv
+  image_root: crops/Crop_224_5fp_100K
+  val_split: 0.2
+  seed: 123                  # même split que convnext_base_v2 / cnx_synth
+
+model:
+  backbone: convnextv2_base   # ConvNeXt V2 (FCMAE) — successeur direct de ConvNeXt
+  pretrained: true
+  dropout: 0.3
+  head_dims: [512, 128]
+
+training:
+  epochs: 30
+  batch_size: 32
+  lr: 0.00003               # lr bas : backbone FCMAE diverge à 1e-4
+  weight_decay: 0.0001
+  scheduler: cosine
+  warmup_epochs: 1
+  use_weighted_sampler: true
+  gender_balance: true
+  male_boost: 2.5            # recette PROPRE (= convnext_base_v2 qui généralise sur test)
+  # PAS de male_boost_gt_scaled, tail_k, ni synth_degrad : ils surapprennent le val (cnx_synth = 0.00218 test)
+
+augmentation:
+  horizontal_flip: 0.5
+  color_jitter:
+    brightness: 0.3
+    contrast: 0.3
+    saturation: 0.2
+  rotation_degrees: 20
+  gaussian_blur_p: 0.4
+
+output:
+  checkpoint_dir: checkpoints
+  log_dir: logs
+  submission_dir: submissions
+  experiment_name: convnextv2_base_v1
