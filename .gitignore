@@ -8,13 +8,30 @@ wheels/
 
 # Virtual environments
 .venv
+venv/
 
 # Data (large files)
 occlusion_datasets/
 crops/
-test_predictions.csv
+DataChallenge2026/
+*.csv
+*.npz
 
 # Model training outputs
 checkpoints/
 logs/
 submissions/
+
+# Local working copies (canonical code lives in model-training/)
+/src/
+/configs/
+/scripts/
+
+# Local notes and scratch files (not part of the deliverable)
+CLAUDE.md
+README_FOR_GEMINI.md
+repomix-output.txt
+concern.text
+*.text
+backups/
+\!
