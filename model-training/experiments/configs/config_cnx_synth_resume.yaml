@@ -1,0 +1,42 @@
+data:
+  train_csv: DataChallenge2026/occlusion_datasets/train.csv
+  test_csv: DataChallenge2026/occlusion_datasets/test_students.csv
+  image_root: crops/Crop_224_5fp_100K
+  val_split: 0.2
+  seed: 123
+
+model:
+  backbone: convnext_base
+  pretrained: false
+  dropout: 0.3
+  head_dims: [512, 128]
+
+training:
+  epochs: 6
+  batch_size: 32
+  lr: 0.00001               # reprise depuis epoch 9/15 — lr ~là où cosine en était
+  weight_decay: 0.0001
+  scheduler: cosine
+  warmup_epochs: 0
+  use_weighted_sampler: true
+  gender_balance: true
+  male_boost: 3.0
+  male_boost_gt_scaled: true
+  tail_k: 3.0
+  tail_p: 2.0
+  synth_degrad_p: 0.12
+
+augmentation:
+  horizontal_flip: 0.5
+  color_jitter:
+    brightness: 0.3
+    contrast: 0.3
+    saturation: 0.2
+  rotation_degrees: 20
+  gaussian_blur_p: 0.4
+
+output:
+  checkpoint_dir: checkpoints
+  log_dir: logs
+  submission_dir: submissions
+  experiment_name: cnx_synth_resume
