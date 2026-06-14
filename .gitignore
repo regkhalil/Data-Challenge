@@ -35,3 +35,10 @@ concern.text
 *.text
 backups/
 \!
+
+# LaTeX build artifacts
+report/tectonic
+report/*.log
+report/*.xdv
+report/*.aux
+report/*.out
